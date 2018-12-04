@@ -170,7 +170,9 @@ sSend << "test";
 //return 0;
            pthread_create(&td[threadCount], NULL, serverThreads, (void *) &socketsVector);
            threadCount++;
-           if(&td[5] != NULL){
+           std::cout << threadCount;
+           usleep(1000000);
+           if(threadCount == 5){
              //return 0;
              pthread_join(td[0], NULL);
              pthread_join(td[1], NULL);
