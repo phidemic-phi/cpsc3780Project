@@ -71,21 +71,21 @@ void* serverThreads(void *sVec){
   std::uniform_int_distribution<int> uni(1,5); // guaranteed unbiased
   std::string request = "messageFile";
 
-//exit(0);
+
   std::string reply = "ACK";
 
     std::vector <ServerSocket>test = *(std::vector<ServerSocket>*) sVec;
-std::cout << "B";
+
 
   ServerSocket sendSock = test[0];
-    std::cout << "A";
+
     ServerSocket recSock = test[1];
 
     recSock >> request;
-    std:: cout << request;
+
 std::string message = readFile (request);
 
-//exit(0);
+
     try {
         unsigned int MESSAGE_SIZE = 7 * 71; // 7 * 71 = 497
         unsigned int frameSentCounter = 0;
@@ -104,12 +104,12 @@ std::string message = readFile (request);
               if (parityIsOdd(currentFrame)) { currentFrame += "1"; } //CORRECT
               else { currentFrame += "0"; } //CORRECT
             }
-//exit(0);
+
             sendSock << currentFrame;
-            //exit(0);
+
             std::cout << "Frame sent." << std::endl;
             recSock >> reply;
-            std::cout << "H";
+
             if (reply == "ACK") {std::cout << "Received ACK.\n";}
             else if (reply != "ACK") {std::cout << "Received NACK, retransmitting.\n";}
 
@@ -125,64 +125,114 @@ std::string message = readFile (request);
  pthread_exit(0);
 }
 
-unsigned int PORT_NUMBER_SEND = 30000;
-unsigned int PORT_NUMBER_REC = 30001;
 
 int main(int argc, int argv[])
 {
 
   try{
       // Create the socket
-int network_number = 30000;
-      unsigned int threadCount = 0;
-      pthread_t td[4];
+unsigned int threadCount =0; //numeric amount of threads running
+std::string countClient="zero"; //string to send to client as ints are not an option
+      pthread_t td[4]; // container for the threads
 
+      //all the socket creation done this way so when a thread is doing stuff
+      //the main does not comback and over write serversend with new info
+      //as we pass things by with pointers
+      std::vector<ServerSocket> socketsVector1 (2); //creating stuff for thread 1
+      ServerSocket serverSend1(30001);
+        ServerSocket serverRec1(30002);
+        ServerSocket sSend1;
+        ServerSocket sRec1;
+
+std::vector<ServerSocket> socketsVector2 (2);
+        ServerSocket serverSend2(30003);
+          ServerSocket serverRec2(30004);
+          ServerSocket sSend2;
+          ServerSocket sRec2;
+
+std::vector<ServerSocket> socketsVector3 (2);
+          ServerSocket serverSend3(30005);
+            ServerSocket serverRec3(30006);
+            ServerSocket sSend3;
+            ServerSocket sRec3;
+
+std::vector<ServerSocket> socketsVector4 (2);
+            ServerSocket serverSend4(30007);
+              ServerSocket serverRec4(30008);
+              ServerSocket sSend4;
+              ServerSocket sRec4;
+
+std::vector<ServerSocket> socketsVector5 (2);
+              ServerSocket serverSend5(30009);
+                ServerSocket serverRec5(30010);
+                ServerSocket sSend5;
+                ServerSocket sRec5;
       while (true){
-usleep(1000000);
-          std::vector<ServerSocket> socketsVector (2);
-          std::cout << "E";
-          ServerSocket serverSend(30000);
-          network_number++;
-          std::cout << "K";
-          ServerSocket serverRec(30001);
-          network_number++;
-          std::cout << "Y";
-          ServerSocket sSend;
-          ServerSocket sRec;
+        ServerSocket serverWait(30000); // to catch all incoming requests
+        ServerSocket sWait;
+        serverWait.accept(sWait);
+        sWait << countClient; //tell them what thread we on
+        switch (threadCount) {
+          case 0: //case to start the right thread
+            threadCount++; //incrementing to keep track of things
+            serverRec1.accept(sRec1);
+            serverSend1.accept(sSend1);
+            socketsVector1[0] =sSend1; // putting them in the vector to be split in threads
+            socketsVector1[1]=sRec1;
 
-          std::cout << "F";
+            pthread_create(&td[threadCount], NULL, serverThreads, (void *) &socketsVector1);
+// creating the first thread
+            countClient="one";
+            break;
+          case 1:
+            serverRec2.accept(sRec2);
+            serverSend2.accept(sSend2);
+            socketsVector2[0] =sSend2;
+            socketsVector2[1]=sRec2;
+            pthread_create(&td[threadCount], NULL, serverThreads, (void *) &socketsVector2);
+            threadCount++;
+            countClient ="two";
+            break;
+          case 2:
+            serverRec3.accept(sRec3);
+            serverSend3.accept(sSend3);
+            socketsVector3[0] =sSend3;
+            socketsVector3[1]=sRec3;
+            pthread_create(&td[threadCount], NULL, serverThreads, (void *) &socketsVector3);
+            threadCount++;
+            countClient="three";
+            break;
+          case 3:
+            serverRec4.accept(sRec4);
+            serverSend4.accept(sSend4);
+            socketsVector4[0] =sSend4;
+            socketsVector4[1]=sRec4;
+            pthread_create(&td[threadCount], NULL, serverThreads, (void *) &socketsVector4);
+            threadCount++;
+            countClient="four";
+            break;
+            case 4:
+              serverRec5.accept(sRec5);
+              serverSend5.accept(sSend5);
+              socketsVector5[0] =sSend5;
+              socketsVector5[1]=sRec5;
+              pthread_create(&td[threadCount], NULL, serverThreads, (void *) &socketsVector5);
+              pthread_join(td[0], NULL);
+              pthread_join(td[1], NULL);
+              pthread_join(td[2], NULL);
+              pthread_join(td[3], NULL);
+              pthread_join(td[4], NULL);
+              //all 5 concurent ones are done so kill them all
+              threadCount = 0;
+              countClient = "zero";
+              //reset counters so 5 at once and no cap
+              break;
+          }
 
-          serverRec.accept(sRec);
-            serverSend.accept(sSend);
-sSend << "test";
-          //std::string request;
 
-          //sSend >> request;
-          //sRec >> request;
-
-
-//return 0;
-
-           std::cout << "G";
-           socketsVector[0] =sSend;
-           std::cout << "Y";
-           socketsVector[1]=sRec;
-//return 0;
-           pthread_create(&td[threadCount], NULL, serverThreads, (void *) &socketsVector);
-           threadCount++;
-           std::cout << threadCount;
-           usleep(1000000);
-           if(threadCount == 5){
-             //return 0;
-             pthread_join(td[0], NULL);
-             pthread_join(td[1], NULL);
-             pthread_join(td[2], NULL);
-             pthread_join(td[3], NULL);
-             pthread_join(td[4], NULL);
-             threadCount = 0;
       }
 
-    }
+
   }
   catch(SocketException& e){
       std::cout << "Exception was caught:" << e.description() << "\nExiting.\n";

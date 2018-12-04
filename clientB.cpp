@@ -63,35 +63,33 @@ std::string readFile(std::string fileName) {
 int main(int argc, int argv[])
 {
 
-  bool debuggingText = true;
+  bool debuggingText = false;
   try{
-    //  ClientSocket clientSend ("Network", 30001);
-    //std:: cout << "attept1";
-      ClientSocket clientRec ("Network", 30000);
-      usleep(100);
-      //return 0;
-    //  std:: cout << "attept 2";
-      ClientSocket clientSend ("Network", 30001);
+    int threadCount;
+    std::string caseClient, request;
+    ClientSocket clientConnect ("Network", 30000);
+    clientConnect >> caseClient; // couldnt send int's needed string
+    if (caseClient == "zero") //strings cant do cases
+        threadCount =1;
+        else if (caseClient == "one")
+        threadCount =3;
+        else if (caseClient == "two")
+        threadCount = 5;
+      else if (caseClient == "three")
+        threadCount = 7;
+      else if (caseClient == "four")
+        threadCount = 9;
+
+      ClientSocket clientRec ("Network", 30000+threadCount);
+      ClientSocket clientSend ("Network", 30001+threadCount);
       std::string reply;
-
+      std::cin >> request;
       try {
-
-
-
-          //clientSend << "Hello";
-            //clientRec << "Hello";
-            usleep(100);
-clientRec >> reply;
-std:: cout << reply;
-            //clientSend << "hello";
-          std::cout << "H";
-
-          clientSend << "messageFile";
+          clientSend << request; //requesting a specific file no .txt needed
   	      while (true){
 
-             std::cout << "L";
   		        std::string data;
-usleep(10000);
+
   		        clientRec >> data;
               if (debuggingText)
                 std::cout << "\nReceived frame. " << data;
@@ -104,23 +102,24 @@ usleep(10000);
                   std::cout << "Status: ERROR DETECTED." << std::endl;
               }
 
-              std::cout << "O";
+
               if (parityIsOdd(data) == false) { //parityIsOdd(data) == false
-                std::cout << "V";
+
                 clientSend << "ACK";
                 if (debuggingText) {std::cout << "Sending back ACK. Contents:\n'";}
                 std::cout << decode(data) <<std::endl;
                }
               else {
-                std::cout << "D";
+
                 clientSend << "NACK";
               if (debuggingText)
                 std::cout << "<< Sending back NAK. >>\n";
+                std::cout << decode(data) <<std::endl;
               }
-            //std:: cout<< true;
+
 
   	      }
-          //std:: cout << "left input loop";
+
   	  }
 
   	  catch(SocketException&){
